@@ -71,4 +71,12 @@ class Manager:
             )
         for tenant in tenants_in_apartment ] 
     
-    
+    def get_tax(self, year: int, month: int, tax_rate: float = 0.085) -> int:
+        if month < 1 or month > 12:
+            raise ValueError("Month must be between 1 and 12")
+        total_income = sum(
+            transfer.amount_pln
+            for transfer in self.transfers
+            if transfer.settlement_year == year and transfer.settlement_month == month
+        )
+        return round(total_income * tax_rate)    

@@ -1,6 +1,6 @@
 import pytest
 from src.manager import Manager
-from src.models import Parameters
+from src.models import Parameters, Transfer
 
 
 def test_settlement_data_integrity():
@@ -30,3 +30,18 @@ def test_settlement_data_integrity():
     total_tenants_due = sum(ts.total_due_pln for ts in tenants_settlements)
     assert total_tenants_due == pytest.approx(total_apartment_costs)
     assert total_tenants_due == pytest.approx(apartment_settlement.total_due_pln)
+
+def test_get_tax():
+    params = Parameters()
+    manager = Manager(params)
+
+    manager.transfers = [
+        Transfer(amount_pln=2500.0, date="2025-01-04", settlement_year=2025, settlement_month=1, tenant="tenant-1"),
+        Transfer(amount_pln=2500.0, date="2025-01-05", settlement_year=2025, settlement_month=1, tenant="tenant-2"),
+        Transfer(amount_pln=2500.0, date="2025-01-06", settlement_year=2025, settlement_month=1, tenant="tenant-3"),
+        Transfer(amount_pln=1000.0, date="2025-02-05", settlement_year=2025, settlement_month=2, tenant="tenant-1"),
+    ]
+
+    assert manager.get_tax(2025, 1, 0.085) == 638
+    assert manager.get_tax(2025, 2, 0.085) == 85
+    assert manager.get_tax(2025, 3, 0.085) == 0

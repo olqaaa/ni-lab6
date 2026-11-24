@@ -1,3 +1,4 @@
+import sys
 from src.manager import Manager
 from src.models import Parameters
 
@@ -67,7 +68,20 @@ if __name__ == '__main__':
     parameters = Parameters()
     manager = Manager(parameters)
 
-    display_apartments(manager)
-    display_tenants(manager)
+    if len(sys.argv) == 4:
+        apartment_key = sys.argv[1]
+        year = int(sys.argv[2])
+        month = int(sys.argv[3])
+
+        settlement = manager.get_settlement(apartment_key, year, month)
+        print_section_header(f"ROZLICZENIE: {apartment_key} ({year}-{month:02d})")
+        print(f"  Suma kosztów mieszkania: {format_currency(settlement.total_due_pln)}")
+
+        print_subsection_header("Rozliczenia najemców")
+        for ts in manager.create_tenants_settlements(settlement):
+            print(f"  {ts.tenant:<20} {format_currency(ts.total_due_pln)}")
+    else:
+        display_apartments(manager)
+        display_tenants(manager)
     
     print(f"\n{'=' * 70}\n")
